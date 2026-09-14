@@ -54,6 +54,7 @@ function addFooterNote(slide, text) {
 /* ============================= 1. TITLE ============================= */
 {
   const s = pres.addSlide({ masterName: "DARK" });
+  s.addNotes("สวัสดีครับ ผมชื่อนายกันต์กวี รามศรี รหัสนักศึกษา 6900102365 วันนี้จะมานำเสนองาน Real-Time Data Pipeline Architecture และระบบตรวจจับความผิดปกติสำหรับระบบ POS ขององค์กรครับ โดยจะครอบคลุมทั้ง 4 Task ตามที่โจทย์กำหนด");
   s.addShape(pres.ShapeType.ellipse, { x: 10.6, y: -1.6, w: 4.8, h: 4.8, fill: { color: "26307A" }, line: { type: "none" } });
   s.addShape(pres.ShapeType.ellipse, { x: -1.4, y: 5.2, w: 3.6, h: 3.6, fill: { color: "26307A" }, line: { type: "none" } });
 
@@ -81,6 +82,7 @@ function addFooterNote(slide, text) {
 /* ============================= 2. AGENDA ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("ก่อนเข้าเนื้อหา ขอสรุปภาพรวมก่อนนะครับ งานนี้แบ่งเป็น 4 ส่วน — Task 1 คือการจำลองข้อมูลการขายและสถานการณ์ผิดปกติ, Task 2 คือระบบดึงข้อมูลอัตโนมัติด้วย Airflow ที่ทนทานต่อความผิดพลาด, Task 3 คือ Dashboard แสดงผลแบบสด, และ Task 4 คือรายงานเปรียบเทียบประสิทธิภาพพร้อมข้อเสนอขยายระบบ");
   addKicker(s, "Agenda");
   addTitle(s, "วัตถุประสงค์และขอบเขตการนำเสนอ");
 
@@ -104,6 +106,7 @@ function addFooterNote(slide, text) {
 /* ============================= 3. ARCHITECTURE OVERVIEW ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("นี่คือภาพรวมของทั้งระบบครับ เริ่มจาก Workload Generator ที่จำลองข้อมูลการขาย ส่งเป็นไฟล์ไปวางไว้ที่ Landing Directory จากนั้น Airflow DAG จะคอยตรวจจับไฟล์ใหม่ ดึงเข้ามาตรวจสอบแล้วบันทึกลง PostgreSQL แล้วข้อมูลนี้จะถูกนำไปแสดงผลใน Dashboard และถ้าเจอความผิดปกติ ระบบจะส่งการแจ้งเตือนแยกออกไปอีกทางหนึ่งด้วยครับ ทุกขั้นตอนถูกออกแบบให้ Idempotent คือรันซ้ำกี่ครั้งข้อมูลก็ไม่ซ้ำซ้อน ซึ่งผมทดสอบจริงแล้วครับ");
   addKicker(s, "System Overview");
   addTitle(s, "ภาพรวมสถาปัตยกรรมของระบบ (End-to-End)");
 
@@ -139,6 +142,7 @@ function addFooterNote(slide, text) {
 /* ============================= 4. TASK 1 - GENERATOR ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("เริ่มที่ Task 1 ครับ ผมเขียน Python script ขึ้นมาจำลองสถานการณ์จริงของร้าน POS สี่แบบ — อย่างแรกคือ Flash Sale ยอดขายพุ่งขึ้น 10 เท่าในช่วงเวลาสั้นๆ, อย่างที่สองคือข้อมูลมาช้ากว่าเวลาจริง เหมือนเครื่อง POS เน็ตหลุดแล้วข้อมูลมาทีหลัง, อย่างที่สามคือรายการซื้อขายซ้ำ เหมือนบิลเดียวกันถูกส่งเข้ามาสองรอบ, และสุดท้ายคือยอดเงินติดลบ ซึ่งเป็นข้อมูลที่ผิดปกติไม่ควรเกิดขึ้นจริง");
   addKicker(s, "Task 1");
   addTitle(s, "Advanced Workload & Edge Case Generation");
   s.addText("จำลองสถานการณ์จริงของระบบ POS ด้วย Python script (scripts/workload_generator.py) เพิ่มเติมจากยอดขายปกติ", {
@@ -168,6 +172,7 @@ function addFooterNote(slide, text) {
 /* ============================= 5. TASK 1 - RESULTS ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("ผมรัน script นี้จริงบนเครื่อง ได้ผลลัพธ์ตามกราฟนี้ครับ จะเห็นว่าช่วง Flash Sale อัตราการส่งข้อมูลพุ่งขึ้นจาก 10 เป็น 100 records ต่อ batch คือ 10 เท่าตามที่ออกแบบไว้พอดี รวมทั้งหมดสร้างข้อมูลไป 560 รายการ มีความผิดปกติที่ inject เข้าไปโดยตั้งใจ 62 รายการ");
   addKicker(s, "Task 1 — ผลการทดลองจริง");
   addTitle(s, "ผลการรัน Workload Generator บนระบบจริง");
 
@@ -202,6 +207,7 @@ function addFooterNote(slide, text) {
 /* ============================= 6. TASK 2 - OVERVIEW ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("มาถึง Task 2 ซึ่งเป็นส่วนที่ผมให้ความสำคัญมากที่สุด เพราะเป็นหัวใจของระบบ Ingestion Pipeline นี้ผมออกแบบด้วย TaskFlow API ของ Airflow ตามมาตรฐาน Clean Code มีสี่ feature หลักคือ Deferrable Operator, TaskFlow API กับ XCom, Idempotency และ Data Cleanse, และระบบแจ้งเตือนอัตโนมัติ ซึ่งผมจะอธิบายทีละส่วนครับ");
   addKicker(s, "Task 2");
   addTitle(s, "Resilient Airflow Ingestion Pipeline");
   s.addText("dags/pos_ingestion_pipeline.py — ออกแบบตามมาตรฐาน Clean Code ด้วย TaskFlow API", {
@@ -227,6 +233,7 @@ function addFooterNote(slide, text) {
 /* ============================= 7. TASK 2 - DEFERRABLE COMPARISON ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("ตรงนี้คือส่วนสำคัญที่สุดของ Task 2 ครับ ปกติถ้าโปรแกรมต้อง 'รอ' อะไรบางอย่าง เช่นรอไฟล์ใหม่ วิธีเดิมคือ mode แบบ poke ซึ่งจะครอบครอง worker slot ไว้ตลอดเวลาที่รอ เหมือนคนจองที่นั่งไว้เฉยๆ ทั้งที่ยังไม่ถึงคิว ส่วน mode reschedule จะดีขึ้นมาหน่อยคือคืน slot บางช่วง แต่ที่ผมเลือกใช้คือ Deferrable Operator ซึ่งจะคืน worker slot ทั้งหมดระหว่างรอ ให้ตัว Triggerer เป็นคนจัดการแทน ผมทดสอบจริงแล้วเห็นว่า state ของ task เปลี่ยนเป็น deferred ตรงตามที่ออกแบบไว้ทุกกรณีครับ");
   addKicker(s, "Task 2 — Resource Optimization");
   addTitle(s, "Deferrable Operator vs. FileSensor แบบดั้งเดิม");
 
@@ -254,6 +261,7 @@ function addFooterNote(slide, text) {
 /* ============================= 8. TASK 2 - IDEMPOTENCY ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("อีกจุดที่โจทย์เน้นมากคือ Idempotency หรือการรันซ้ำแล้วข้อมูลไม่ซ้ำซ้อน ผมใช้คำสั่ง SQL แบบ ON CONFLICT DO UPDATE ตามที่เห็นในโค้ดนี้ครับ และผมทดสอบจริงโดยเอาไฟล์เดิมมา process ซ้ำสองรอบ ผลคือจำนวนแถวในฐานข้อมูลยังคงเป็น 58 แถวเท่าเดิม ไม่เพิ่มขึ้นเลย และสำหรับข้อมูลที่ผิดปกติ ผมไม่ได้ทิ้งทันทีนะครับ แต่จะ flag ไว้ให้ตรวจสอบภายหลังแทน เพื่อรักษาความถูกต้องของฐานข้อมูล");
   addKicker(s, "Task 2 — Idempotency & Data Cleanse");
   addTitle(s, "รัน DAG ซ้ำกี่ครั้ง ข้อมูลก็ไม่ซ้ำซ้อน");
 
@@ -288,6 +296,7 @@ function addFooterNote(slide, text) {
 /* ============================= 9. TASK 2 - ALERTING ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("สุดท้ายของ Task 2 คือระบบแจ้งเตือนอัตโนมัติครับ เมื่อ pipeline ประมวลผลเสร็จแล้วพบว่ามีความผิดปกติ ระบบจะประกอบข้อความแล้วส่งผ่าน Telegram Bot หรือ Slack Webhook โดยอัตโนมัติ ตอนนี้ผมยังไม่ได้ผูก token จริง เลยรันเป็นโหมด dry-run ที่บันทึก log ข้อความไว้แทน แต่ logic ทั้งหมดพร้อมใช้งานจริงทันทีที่ใส่ token เข้าไปครับ");
   addKicker(s, "Task 2 — Dynamic Alerting");
   addTitle(s, "ระบบแจ้งเตือนอัตโนมัติเมื่อพบ Anomaly");
 
@@ -319,6 +328,7 @@ function addFooterNote(slide, text) {
 /* ============================= 10. TASK 3 - DASHBOARD ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("มาที่ Task 3 ครับ ผมสร้าง Dashboard ด้วย Streamlit ที่ดึงข้อมูลจาก PostgreSQL มาแสดงแบบสด กราฟนี้เป็นข้อมูลจริงจากฐานข้อมูล จะเห็น Flash Sale ที่ทำให้ยอดขายพุ่งขึ้นชัดเจนมาก นอกจากยอดขายรวมแล้ว Dashboard ยังคำนวณค่าเฉลี่ยเคลื่อนที่หรือ Moving Average ซ้อนบนกราฟ และไฮไลต์รายการที่ผิดปกติด้วยสีแดงในตารางด้านล่างด้วยครับ");
   addKicker(s, "Task 3");
   addTitle(s, "Live Analytics Dashboard (Streamlit)");
 
@@ -351,6 +361,7 @@ function addFooterNote(slide, text) {
 /* ============================= 11. TASK 3 - DEPLOYMENT ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("และที่สำคัญคือ Dashboard นี้ไม่ได้รันอยู่แค่ในเครื่องผมนะครับ แต่ผม deploy ขึ้นไปจริงแล้ว โดยใช้ Streamlit Community Cloud เชื่อมกับ GitHub repository และย้ายฐานข้อมูลไปไว้บน Neon ซึ่งเป็น PostgreSQL แบบสาธารณะ ตอนนี้ใครก็เข้าดูผ่านลิงก์ HTTPS นี้ได้เลยครับ ทุกส่วนของ Task 3 เสร็จสมบูรณ์ตามเกณฑ์ที่โจทย์กำหนด");
   addKicker(s, "Task 3 — Secure Deployment");
   addTitle(s, "การเปิดใช้งาน Dashboard ผ่าน HTTPS Domain");
 
@@ -382,6 +393,7 @@ function addFooterNote(slide, text) {
 /* ============================= 12. TASK 4 - METHODOLOGY ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("ต่อมาคือ Task 4 ครับ ผมต้องการเปรียบเทียบว่า sensor สามแบบที่พูดถึงก่อนหน้านี้ ต่างกันแค่ไหนจริงๆ เลยเขียน DAG สามตัวที่เหมือนกันทุกอย่าง ต่างกันแค่โหมดของ sensor แล้ววัดผลจริงโดยดู state ของ task และ resource การใช้งาน CPU ของ container ในช่วงที่ sensor กำลังรออยู่ ทุกอย่างรันจริงบน docker-compose stack ของโปรเจกต์นี้ครับ ไม่ใช่ผลจำลอง");
   addKicker(s, "Task 4 — Benchmark Methodology");
   addTitle(s, "วิธีการวัดผล Poke vs Reschedule vs Deferrable");
 
@@ -412,6 +424,7 @@ function addFooterNote(slide, text) {
 /* ============================= 13. TASK 4 - BENCHMARK RESULTS ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("นี่คือผลลัพธ์จริงที่วัดได้ครับ จะเห็นว่า state ของ task ตรงตามที่ออกแบบไว้ทุกโหมด — poke จะค้างอยู่ที่ running ตลอด, reschedule จะสลับไปมา, ส่วน deferrable จะไปอยู่ที่ deferred ซึ่งหมายความว่าไม่ได้ครอบครอง worker slot เลย ส่วนตัวเลข CPU ผมขอเรียนตรงๆ ว่ายังไม่ใช่ตัวชี้วัดที่แม่นยำนักที่ scale เล็กแบบนี้ เพราะมันถูกรบกวนจาก housekeeping ของ Airflow เอง แต่ state ของ task คือหลักฐานที่ชัดเจนที่สุดครับ");
   addKicker(s, "Task 4 — ผลการทดลองจริง");
   addTitle(s, "ผลลัพธ์ Benchmark: Worker Slot Occupancy");
 
@@ -462,6 +475,7 @@ function addFooterNote(slide, text) {
 /* ============================= 14. TASK 4 - SCALABILITY ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("สุดท้ายผมเขียนข้อเสนอว่า ถ้าระบบต้องขยายไปรองรับ 10,000 transaction ต่อวินาที จะต้องเปลี่ยนอะไรบ้าง เพราะระบบปัจจุบันที่ใช้การรับไฟล์แบบ batch จะรับมือไม่ไหวแน่นอน สิ่งที่ต้องเปลี่ยนหลักๆ คือเปลี่ยนจากการรับไฟล์เป็น Apache Kafka ที่รับข้อมูลแบบ stream ต่อเนื่อง เปลี่ยนจาก Airflow batch DAG เป็นตัวประมวลผลแบบ Flink หรือ Kafka Streams ที่ทำงานต่อเนื่องตลอดเวลา และเปลี่ยนฐานข้อมูลจาก PostgreSQL แบบ row-store เป็นฐานข้อมูลแบบ Columnar อย่าง ClickHouse ที่เหมาะกับงานวิเคราะห์ข้อมูลปริมาณมากครับ");
   addKicker(s, "Task 4 — Scalability Proposal");
   addTitle(s, "ข้อเสนอสถาปัตยกรรมสำหรับ 10,000 Transactions/วินาที");
 
@@ -484,6 +498,7 @@ function addFooterNote(slide, text) {
 /* ============================= 15. SUMMARY ============================= */
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
+  s.addNotes("สรุปภาพรวมทั้งหมดเทียบกับเกณฑ์การประเมินนะครับ — ด้าน System Resilience ผมพิสูจน์ Idempotency ด้วยการทดสอบจริง ด้าน Airflow Architecture ผมใช้ Deferrable Operator ร่วมกับ TaskFlow API และยืนยัน state จริงตรงตามที่ออกแบบ ด้านรายงานผมมีผลการทดสอบเชิงตัวเลขจริงพร้อมข้อเสนอขยายระบบ และด้าน Dashboard ผม deploy ขึ้นสู่สาธารณะผ่าน HTTPS เรียบร้อยแล้วครับ");
   addKicker(s, "Summary");
   addTitle(s, "สรุปผลลัพธ์เทียบกับเกณฑ์การประเมิน");
 
@@ -507,6 +522,7 @@ function addFooterNote(slide, text) {
 /* ============================= 16. THANK YOU ============================= */
 {
   const s = pres.addSlide({ masterName: "DARK" });
+  s.addNotes("งานนี้ผมตั้งใจทำให้ทุกส่วนรันได้จริง ไม่ใช่แค่ทฤษฎีครับ ขอบคุณที่รับชมครับ หากมีคำถามยินดีตอบครับ");
   s.addShape(pres.ShapeType.ellipse, { x: -1.6, y: -1.8, w: 5.2, h: 5.2, fill: { color: "26307A" }, line: { type: "none" } });
   s.addShape(pres.ShapeType.ellipse, { x: 10.8, y: 4.8, w: 4.2, h: 4.2, fill: { color: "26307A" }, line: { type: "none" } });
 
