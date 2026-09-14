@@ -1,0 +1,28 @@
+# Airflow runtime
+logs/
+plugins/__pycache__/
+**/__pycache__/
+*.pyc
+
+# Data (generated at runtime, not source)
+data/landing/*
+data/processed/*
+data/benchmark/*
+!data/landing/.gitkeep
+!data/processed/.gitkeep
+!data/benchmark/.gitkeep
+
+# Secrets — keep .env.example in the repo, never the real .env
+.env
+
+# Python / Node envs
+.venv/
+node_modules/
+*.egg-info/
+
+# Slide build artifacts
+slides/slide-*.jpg
+slides/*.pdf
+
+# OS
+.DS_Store

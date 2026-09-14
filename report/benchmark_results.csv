@@ -1,0 +1,4 @@
+dag_id,run_id,wait_seconds,task_states_seen,final_dag_run_state,avg_cpu_scheduler_pct,avg_cpu_triggerer_pct
+benchmark_poke,bench_1789357418,30,running,success,10.71,1.71
+benchmark_reschedule,bench_1789357463,30,up_for_reschedule,success,21.19,2.02
+benchmark_deferrable,bench_1789357514,30,deferred,success,13.87,5.35
