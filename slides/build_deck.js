@@ -355,23 +355,28 @@ function addFooterNote(slide, text) {
   addTitle(s, "การเปิดใช้งาน Dashboard ผ่าน HTTPS Domain");
 
   const rows = [
-    ["Dashboard Code", "dashboard/app.py พร้อม requirements.txt", "เสร็จสมบูรณ์ — ทดสอบ Local ผ่าน"],
-    ["Local Verification", "streamlit run app.py — ต่อ Postgres จริง", "เสร็จสมบูรณ์ — ยืนยันด้วย Screenshot"],
-    ["Public HTTPS Deploy", "Streamlit Community Cloud + GitHub Repo", "ขั้นตอนถัดไป — ต้องใช้บัญชีส่วนตัว"],
+    ["Dashboard Code", "dashboard/app.py พร้อม requirements.txt", "เสร็จสมบูรณ์"],
+    ["Public Database", "PostgreSQL บน Neon (Serverless) — migrate ข้อมูลจริง 542 แถว", "เสร็จสมบูรณ์"],
+    ["Public HTTPS Deploy", "Streamlit Community Cloud เชื่อมกับ GitHub Repo", "เสร็จสมบูรณ์ — Live"],
   ];
-  let y = 2.0;
-  rows.forEach(([head, detail, status], i) => {
-    const done = i < 2;
-    s.addShape(pres.ShapeType.roundRect, { x: 0.6, y, w: 12.1, h: 1.15, rectRadius: 0.08, fill: { color: CARD_BG }, line: { type: "none" } });
-    s.addShape(pres.ShapeType.ellipse, { x: 0.9, y: y + 0.32, w: 0.5, h: 0.5, fill: { color: done ? PRIMARY : ALERT }, line: { type: "none" } });
-    s.addText(done ? "✓" : "!", { x: 0.9, y: y + 0.32, w: 0.5, h: 0.5, align: "center", valign: "middle", fontFace: BODY_FONT, fontSize: 16, bold: true, color: WHITE, isTextBox: true, margin: 0 });
-    s.addText(head, { x: 1.65, y: y + 0.12, w: 4.0, h: 0.9, valign: "middle", fontFace: BODY_FONT, fontSize: 14, bold: true, color: PRIMARY, isTextBox: true, margin: 0 });
-    s.addText(detail, { x: 5.75, y: y + 0.12, w: 4.5, h: 0.9, valign: "middle", fontFace: BODY_FONT, fontSize: 11.5, color: MUTED, isTextBox: true, margin: 0 });
-    s.addText(status, { x: 10.35, y: y + 0.12, w: 2.25, h: 0.9, valign: "middle", fontFace: BODY_FONT, fontSize: 11, bold: true, color: done ? PRIMARY : ALERT, isTextBox: true, margin: 0 });
-    y += 1.35;
+  let y = 1.85;
+  rows.forEach(([head, detail, status]) => {
+    s.addShape(pres.ShapeType.roundRect, { x: 0.6, y, w: 12.1, h: 1.0, rectRadius: 0.08, fill: { color: CARD_BG }, line: { type: "none" } });
+    s.addShape(pres.ShapeType.ellipse, { x: 0.9, y: y + 0.25, w: 0.5, h: 0.5, fill: { color: PRIMARY }, line: { type: "none" } });
+    s.addText("✓", { x: 0.9, y: y + 0.25, w: 0.5, h: 0.5, align: "center", valign: "middle", fontFace: BODY_FONT, fontSize: 16, bold: true, color: WHITE, isTextBox: true, margin: 0 });
+    s.addText(head, { x: 1.65, y: y + 0.08, w: 4.0, h: 0.85, valign: "middle", fontFace: BODY_FONT, fontSize: 14, bold: true, color: PRIMARY, isTextBox: true, margin: 0 });
+    s.addText(detail, { x: 5.75, y: y + 0.08, w: 4.6, h: 0.85, valign: "middle", fontFace: BODY_FONT, fontSize: 11.5, color: MUTED, isTextBox: true, margin: 0 });
+    s.addText(status, { x: 10.45, y: y + 0.08, w: 2.15, h: 0.85, valign: "middle", fontFace: BODY_FONT, fontSize: 11.5, bold: true, color: PRIMARY, isTextBox: true, margin: 0 });
+    y += 1.18;
   });
 
-  addFooterNote(s, "แผน: push โค้ดขึ้น GitHub → เชื่อม Streamlit Community Cloud → ตั้งค่า DATABASE_URL เป็น secret → ได้โดเมน HTTPS ฟรี");
+  s.addShape(pres.ShapeType.roundRect, { x: 0.6, y: 5.35, w: 12.1, h: 1.2, rectRadius: 0.08, fill: { color: PRIMARY }, line: { type: "none" } });
+  s.addText("LIVE DASHBOARD URL", { x: 0.9, y: 5.5, w: 6, h: 0.4, fontFace: BODY_FONT, fontSize: 12, bold: true, color: SECONDARY, charSpacing: 1.5, isTextBox: true, margin: 0 });
+  s.addText("pos-anomaly-pipeline-duga3in95l2i7apb78xzee.streamlit.app", {
+    x: 0.9, y: 5.85, w: 11.5, h: 0.55, fontFace: "Courier New", fontSize: 17, bold: true, color: WHITE, isTextBox: true, margin: 0,
+  });
+
+  addFooterNote(s, "Architecture: GitHub (source) → Streamlit Community Cloud (hosting + HTTPS) → Neon PostgreSQL (public serverless DB) — ข้อมูลจาก local pipeline ถูก migrate ขึ้นจริง");
 }
 
 /* ============================= 12. TASK 4 - METHODOLOGY ============================= */
@@ -486,7 +491,7 @@ function addFooterNote(slide, text) {
     ["System Resilience & Data Quality", "30%", "Idempotency ยืนยันด้วยการทดสอบจริง (58→58) · Anomaly ถูก flag ไม่ถูกทิ้ง"],
     ["Advanced Airflow Architecture", "25%", "Deferrable Operator + TaskFlow API + XCom ยืนยัน state จริงตรงตามออกแบบ"],
     ["Architectural Report & Trade-offs", "25%", "Benchmark ตัวเลขจริง + ข้อเสนอ Scalability สำหรับ 10,000 TPS"],
-    ["Dashboard & Public Deployment", "20%", "Dashboard ทำงานสมบูรณ์ (Local) · รอ Deploy HTTPS Domain สาธารณะ"],
+    ["Dashboard & Public Deployment", "20%", "Live บน Streamlit Cloud ผ่าน HTTPS จริง · Neon PostgreSQL สาธารณะ"],
   ];
   let y = 1.9;
   rows.forEach(([head, pct, note], i) => {
