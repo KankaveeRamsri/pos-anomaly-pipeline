@@ -1,155 +1,168 @@
 # สคริปต์อัดคลิป Demo — Task 1-4
 
-เป้าหมาย: วิดีโอ ~12-15 นาที ครอบคลุม Task 1-4 ตามที่โจทย์ระบุ ("ส่ง Link video presentation เฉพาะ Task 1-4")
-เปิดไฟล์นี้ไว้บนจอที่สอง (หรือ print) ระหว่างอัด — เป็น checklist ทีละขั้น ไม่ต้องท่องจำ
+แผน: อัด **2 คลิปแยกกัน**
+- **คลิป 1** = พูดตามสไลด์ทั้งหมด (เปิด PowerPoint → Presenter View → อ่านตาม Speaker Notes ที่มีอยู่แล้วในทุกหน้า) ไม่ต้องมีสคริปต์เพิ่มในไฟล์นี้
+- **คลิป 2** = โชว์ demo จริงอย่างเดียว (ไม่ต้องพูดอธิบายเนื้อหาซ้ำ พูดสั้นๆแค่ชี้ว่ากำลังทำอะไร) ← ไฟล์นี้เป็น checklist สำหรับคลิปนี้
+
+ทำเสร็จทั้ง 2 คลิปแล้วส่งไฟล์มาให้ต่อรวมเป็นคลิปเดียวได้
 
 ---
 
-## เตรียมตัวก่อนกดอัด (5-10 นาทีก่อนหน้า)
+## เตรียมตัวก่อนอัดคลิป 2 (ทำครั้งเดียว ก่อนกด Record)
 
-### 1. เตรียมหน้าจอ/แท็บให้พร้อม
-เปิดไว้ล่วงหน้า สลับไปมาได้ทันทีตอนอัด:
-- [ ] Terminal (อยู่ที่ `/Users/balast/dev/DataEng/pos-anomaly-pipeline`)
-- [ ] Browser tab 1: Airflow UI → http://localhost:8080 (login admin/admin ไว้ล่วงหน้า)
+เปิดไว้ล่วงหน้า:
+- [ ] Terminal
+- [ ] Browser tab 1: Airflow UI → http://localhost:8080 (login admin/admin)
 - [ ] Browser tab 2: Dashboard จริง → https://pos-anomaly-pipeline-duga3in95l2i7apb78xzee.streamlit.app/
-- [ ] สไลด์ `pos_pipeline_presentation.pptx` เปิดโหมด Presenter/Slideshow
-- [ ] โปรแกรมอัดหน้าจอ (QuickTime: File → New Screen Recording) พร้อมไมค์
 
-### 2. เช็คว่าระบบพร้อมรัน
+**สำคัญ:** ทุกคำสั่ง terminal ในไฟล์นี้ ให้เริ่มจาก path นี้เสมอ — ถ้าเปิด terminal ใหม่ ให้รันบรรทัดนี้ก่อนอันดับแรกทุกครั้ง:
 ```bash
 cd /Users/balast/dev/DataEng/pos-anomaly-pipeline
+```
+
+เช็คว่า container พร้อม:
+```bash
 docker-compose ps
 ```
-ต้องเห็นทั้ง 5 container status `Up` (ถ้าเผลอปิดเครื่องไปแล้ว ให้รัน `docker-compose up -d` แล้วรอ ~1 นาที)
+ต้องเห็น 5 container status `Up` (ถ้าไม่ขึ้น ให้รัน `docker-compose up -d` รอ ~1 นาที)
 
-### 3. (แนะนำ) รีเซ็ตข้อมูล local ให้ว่าง เพื่อให้ตอนอัดเห็นข้อมูล "เกิดขึ้นสด ๆ" ต่อหน้ากล้อง
+ล้างข้อมูลเก่าให้ landing/processed ว่างสนิท และฐานข้อมูล local ว่าง (จะได้ demo ตั้งแต่ 0):
 ```bash
 docker-compose exec -T postgres-data psql -U pos_user -d pos_data -c "TRUNCATE pos_transactions, pos_anomalies;"
-rm -f data/landing/*.jsonl data/processed/*.jsonl 2>/dev/null
-```
-> หมายเหตุ: dashboard สาธารณะบน Neon จะยังมีข้อมูล 542 แถวเดิมอยู่ (คนละฐานข้อมูลกับ local) — ใช้ตอนโชว์ Task 3/4 ได้เลยไม่ต้องรีเซ็ต
-
-### 4. Unpause DAG (เผื่อ pause ค้างจากรอบทดสอบก่อนหน้า)
-```bash
+rm -f data/landing/*.jsonl data/processed/*.jsonl
 docker-compose exec -T airflow-webserver airflow dags unpause pos_ingestion_pipeline
 ```
+> หมายเหตุ: Dashboard สาธารณะบน Neon เป็นฐานข้อมูลคนละตัว ไม่ถูกล้าง ใช้โชว์ Task 3 ได้เลยโดยไม่ต้องทำอะไรเพิ่ม
 
 ---
 
-## บทพูด + ขั้นตอนการอัด
+## ขั้นตอนอัดคลิป 2 (ทำตามลำดับนี้เป๊ะๆ — แต่ละขั้นรอให้เสร็จก่อนไปขั้นต่อไป)
 
-### 🎬 ส่วนที่ 1 — เปิดคลิป (30 วินาที)
-**พูด:** แนะนำตัว — "สวัสดีครับ ผมนายกันต์กวี รามศรี รหัสนักศึกษา 6900102365 นำเสนองาน Real-Time Data Pipeline Architecture & Anomaly Detection System for Enterprise POS ครับ"
+### ขั้น 1 — โชว์ Deferrable Operator (จุดสำคัญสุดของ Task 2)
 
-**แสดง:** สไลด์หน้า 1 (Title)
+**เช็คก่อนว่า landing ว่างจริง:**
+```bash
+ls data/landing
+```
+ต้องไม่มีไฟล์ (ถ้ามีให้ลบตามคำสั่งด้านบนอีกที)
+
+ไปที่ Airflow UI → คลิก `pos_ingestion_pipeline` → กด **Trigger DAG** (▶ มุมขวาบน)
+
+รอ ~5 วินาที → คลิกเข้า task **`wait_for_new_file`** ในหน้า Grid → ดูช่อง State
+
+**พูด:** "ตรงนี้จะเห็น state เป็น `deferred` เพราะยังไม่มีไฟล์เข้ามา ตัวระบบไม่ได้ยึดพื้นที่ประมวลผลไว้เฉยๆ ระหว่างรอครับ"
+
+> เพราะ landing ว่าง จะไม่มีไฟล์ให้เจอ สถานะนี้จะ**ค้างอยู่แบบนี้ได้นาน** (ไม่หายไปเร็วๆ) มีเวลาถ่ายชัดๆ ไม่ต้องรีบ
 
 ---
 
-### 🎬 ส่วนที่ 2 — Agenda + Architecture (1 นาที)
-**พูด:** อธิบายสั้น ๆ ว่าจะพูด 4 Task อะไรบ้าง แล้วโชว์ภาพรวมสถาปัตยกรรม
+### ขั้น 2 — ปล่อยให้ไฟล์แรกเข้ามา (ปลด deferred)
 
-**แสดง:** สไลด์หน้า 2 (Agenda) → หน้า 3 (Architecture diagram)
-พูดไล่ตาม diagram: "ข้อมูลเริ่มจาก Workload Generator → ตกไฟล์ที่ Landing Directory → Airflow DAG ดึงเข้า Postgres → ต่อกับ Dashboard และมี Alert แยกออกไปเมื่อเจอ anomaly"
-
----
-
-### 🎬 ส่วนที่ 3 — Task 1: Workload Generator (2 นาที)
-**แสดง:** สไลด์หน้า 4-5 (พูดสั้น ๆ ว่ามี 4 edge case อะไรบ้าง)
-
-**สลับไป Terminal — รันจริงให้ดู:**
+เปิด terminal อีกแท็บ (หรือสลับไป) รันคำสั่งนี้ — สร้างไฟล์ตัวอย่าง **1 ไฟล์ทันที**:
 ```bash
 cd /Users/balast/dev/DataEng/pos-anomaly-pipeline/scripts
+python3 workload_generator.py --once --landing-dir ../data/landing
+```
+
+**พูด:** "พอผมป้อนไฟล์เข้าไป ระบบจะตรวจพบและทำงานต่อทันที"
+
+กลับไป Airflow UI รอ ~10-20 วินาที → รีเฟรชหน้า Grid → task `wait_for_new_file` จะเปลี่ยนเป็นสีเขียว (success) แล้ว task ต่อๆไปจะรันจนครบทุกกล่องเป็นสีเขียว
+
+คลิกเข้า task **`check_and_alert`** → ดู Logs สั้นๆ
+**พูด:** "นี่คือ log การแจ้งเตือน ตอนนี้เป็น dry-run เพราะยังไม่ผูก token จริง"
+
+---
+
+### ขั้น 3 — โชว์ Flash Sale (Task 1)
+
+กลับไป terminal (folder `scripts`) รันคำสั่งนี้ **แล้วรอจนมันรันจบเอง** (ประมาณ 60 วินาที ห้ามกด Ctrl+C ก่อน):
+```bash
 python3 workload_generator.py --landing-dir ../data/landing --duration 60 \
   --base-rate 2 --flash-sale-at 15 --flash-sale-duration 15 --flash-sale-multiplier 10 \
   --late-arrival-rate 0.06 --duplicate-rate 0.04 --negative-amount-rate 0.04
 ```
-**พูดระหว่างรอ (script รันประมาณ 60 วินาที):**
-- ชี้ที่ log บรรทัด `FLASH SALE` ตอน t=15s: "ตรงนี้คือ flash sale จำลอง อัตราพุ่งจาก 2 เป็น 20 ต่อวินาที คือ 10 เท่าตามโจทย์"
-- ชี้ `anomalies_injected` ที่เพิ่มขึ้นเรื่อย ๆ: "นี่คือ anomaly ที่ inject เข้าไปโดยตั้งใจ — duplicate, negative amount, late arrival"
 
-**เปิดไฟล์ตัวอย่างให้ดู (รอ script รันเสร็จ หรือเปิด terminal อีกแท็บ):**
+**พูด (ตอนเห็นบรรทัด `FLASH SALE` ที่ t=15s):** "ตรงนี้คือช่วง Flash Sale อัตราพุ่งจาก 2 เป็น 20 ต่อวินาที คือ 10 เท่าตามที่ออกแบบไว้"
+
+**รอจนบรรทัดสุดท้ายโชว์ `[workload_generator] done.` แล้วค่อยไปขั้นต่อไป — ห้ามข้ามขั้นนี้ตอนยังรันอยู่**
+
+---
+
+### ขั้น 4 — ปล่อยให้ Airflow กินไฟล์ที่เหลือให้หมด
+
+ไปที่ Airflow UI → กด **Trigger DAG** อีกครั้ง (จะกินไฟล์ทั้งหมดที่ script ขั้น 3 สร้างไว้ในทีเดียว)
+
+รอจนรันจบ (ทุกกล่องเขียว) แล้วเช็คว่า landing ว่างแล้วจริง:
 ```bash
-cat ../data/landing/*.jsonl | head -3
+cd /Users/balast/dev/DataEng/pos-anomaly-pipeline
+ls data/landing
 ```
-ชี้ให้เห็นโครงสร้าง JSON หนึ่งบรรทัด = หนึ่ง transaction
+ต้อง**ไม่มีไฟล์เหลือ** (ถ้ายังมี ให้กด Trigger ซ้ำจนกว่าจะว่าง)
 
 ---
 
-### 🎬 ส่วนที่ 4 — Task 2: Airflow Ingestion Pipeline (4-5 นาที — ส่วนสำคัญที่สุด)
-**แสดง:** สไลด์หน้า 6 (overview 4 feature) พูดไล่สั้น ๆ
+### ขั้น 5 — พิสูจน์ Idempotency (จุดสำคัญสุดอันดับ 2)
 
-**สลับไป Airflow UI (http://localhost:8080):**
+เช็คตัวเลขตั้งต้น:
+```bash
+docker-compose exec -T postgres-data psql -U pos_user -d pos_data -c "SELECT count(*) FROM pos_transactions;"
+```
+**พูด:** "ตอนนี้มีข้อมูล X แถวในฐานข้อมูล" (อ่านเลขที่เห็นจริง)
 
-1. คลิกเข้า DAG `pos_ingestion_pipeline` → แท็บ **Graph** ชี้ให้เห็น task ทั้งหมด: `wait_for_new_file → list_landing_files → extract_and_validate → load_to_postgres → [archive_files, check_and_alert]`
-   **พูด:** "นี่คือ TaskFlow API ที่ใช้ @dag/@task decorator ทั้งหมด"
+เอาไฟล์ที่ประมวลผลไปแล้วทั้งหมด **กลับมาวางที่ landing ใหม่** (จำลองว่า "ป้อนไฟล์เดิมซ้ำ"):
+```bash
+cp -p data/processed/*.jsonl data/landing/
+```
 
-2. Trigger DAG ด้วยตัวเอง (ปุ่ม ▶ มุมขวาบน → Trigger DAG)
+ไปที่ Airflow UI → กด **Trigger DAG** อีกครั้ง → รอจนรันจบ (เขียวทุกกล่อง)
 
-3. **จุดไฮไลต์ (สำคัญ — ตรงกับสไลด์หน้า 7):** รีเฟรชหน้า Grid เร็ว ๆ แล้วคลิกที่ task `wait_for_new_file` ให้เห็น state เป็น **`deferred`** (สีพิเศษต่างจาก running)
-   **พูด:** "ตรงนี้คือหัวใจของ Task 2 — Deferrable Operator ครับ สังเกตว่า state คือ `deferred` ไม่ใช่ `running` แปลว่า worker slot ถูกคืนกลับไปแล้ว ตัว Triggerer process จะจัดการรอไฟล์แทน ต่างจาก FileSensor แบบเดิมที่ mode='poke' จะครอบครอง slot ตลอดเวลาที่รอ"
+กลับ terminal เช็คตัวเลขอีกครั้ง:
+```bash
+docker-compose exec -T postgres-data psql -U pos_user -d pos_data -c "SELECT count(*) FROM pos_transactions;"
+```
+**พูด:** "เห็นไหมครับ ตัวเลขยังเป็น X เท่าเดิม ทั้งที่ผมป้อนไฟล์ชุดเดียวกันเข้าไปซ้ำ — นี่คือ Idempotency ตัวจริงครับ"
 
-4. รอ DAG รันจนจบ (สัก 1-2 นาที ถ้ามีไฟล์จาก Task 1 รออยู่แล้วจะเร็ว) → ชี้ทุก task เป็นสีเขียว (success)
-
-5. **Proof ของ Idempotency (ตรงกับสไลด์หน้า 8) — สลับกลับ Terminal:**
-   ```bash
-   docker-compose exec -T postgres-data psql -U pos_user -d pos_data -c "SELECT count(*) FROM pos_transactions;"
-   ```
-   จดตัวเลขไว้ (สมมติ X) แล้ว **trigger DAG ซ้ำอีกรอบ** (โดยไม่มีไฟล์ใหม่ หรือ copy ไฟล์เดิมกลับเข้า landing):
-   ```bash
-   cp -p data/processed/*.jsonl data/landing/
-   ```
-   กลับไป Airflow UI → Trigger DAG อีกครั้ง → รอจบ → กลับ Terminal รันคำสั่งนับแถวซ้ำ
-   **พูด:** "เห็นไหมครับ ตัวเลขยังเท่าเดิมคือ X แถว ทั้งที่ผมป้อนไฟล์เดิมเข้าไปซ้ำ — นี่คือผลจาก `ON CONFLICT (transaction_id) DO UPDATE` ที่ทำให้ rerun กี่ครั้งข้อมูลก็ไม่ซ้ำซ้อน"
-
-6. **Alerting (สไลด์หน้า 9):** คลิกเข้า task `check_and_alert` → ดู Logs
-   **พูด:** "ตรงนี้คือ log การแจ้งเตือน ตอนนี้รันแบบ dry-run เพราะยังไม่ได้ใส่ Telegram token จริง แต่ logic การตรวจจับและส่งข้อความพร้อมใช้งานครบแล้ว"
+> ⚠️ ถ้าตัวเลขเปลี่ยนตรงนี้ แปลว่ามีไฟล์ใหม่หลุดเข้ามาปนระหว่างขั้นตอน (เช่น generator ยังรันไม่จบ หรือ landing ไม่ได้ว่างจริงก่อนขั้น 5) — กลับไปเช็คขั้น 4 อีกที
 
 ---
 
-### 🎬 ส่วนที่ 5 — Task 3: Live Dashboard (2 นาที)
-**แสดง:** สไลด์หน้า 10-11 พูดสั้น ๆ ถึง feature (Moving Average, Anomaly Highlight)
+### ขั้น 6 — โชว์ Dashboard (Task 3)
 
-**สลับไป Browser tab 2 (public dashboard URL) — ชี้ที่ address bar ให้เห็น `https://...streamlit.app` ชัด ๆ:**
-**พูด:** "นี่คือ dashboard ตัวจริงที่ deploy ผ่าน HTTPS domain สาธารณะแล้วครับ ไม่ใช่ localhost"
+สลับไป Browser tab 2 (public dashboard URL) — **ชี้ที่ address bar ให้เห็น `https://...streamlit.app` ชัดๆ**
 
-- ชี้ KPI แถวบน (Total revenue, Transactions, Anomalies)
-- ชี้กราฟ Revenue over time — ถ้ามี flash sale spike ให้ชี้ตรงนั้นเลย พร้อมจุด X สีแดงคือ anomaly
-- เลื่อนลงชี้ตาราง transaction ที่แถว anomaly กลายเป็นพื้นหลังสีแดง
-- ลองขยับ slider "Moving average window" ให้เห็นกราฟเปลี่ยนสด ๆ
+**พูด:** "นี่คือ dashboard ที่ deploy ขึ้นสู่สาธารณะแล้วครับ ไม่ใช่ localhost"
 
----
-
-### 🎬 ส่วนที่ 6 — Task 4: Benchmark & Report (2-3 นาที)
-**แสดง:** สไลด์หน้า 12 (methodology) → 13 (ผลลัพธ์จริง) → 14 (scalability proposal)
-
-**พูดตอนหน้า 13:** "ตัวเลขในตารางนี้มาจากการรันจริงบนเครื่องผม ไม่ใช่ผลจำลอง — เห็นได้ว่า state ของ sensor ตรงตามที่ออกแบบไว้ทุกโหมด: poke ค้างที่ running ตลอด, reschedule สลับ, deferrable ไปที่ deferred"
-
-**พูดตอนหน้า 14:** สรุปสั้น ๆ ว่าถ้าต้องขยายไป 10,000 TPS จะเปลี่ยน component ไหนบ้าง (Kafka, Flink, Columnar DB) — ไม่ต้องอ่านทุกแถว เลือกพูด 2-3 แถวที่สำคัญ เช่น Ingestion Transport กับ Analytics Store
+- ชี้ตัวเลข KPI ด้านบน
+- เลื่อนดูกราฟ — ถ้ามี flash sale spike ให้ชี้ตรงนั้น พร้อมจุด X สีแดง (anomaly)
+- เลื่อนลงชี้ตาราง แถวพื้นหลังสีแดง = รายการผิดปกติ
+- ลองขยับ slider "Moving average window" ให้เห็นกราฟขยับสดๆ
 
 ---
 
-### 🎬 ส่วนที่ 7 — ปิดคลิป (30-45 วินาที)
-**แสดง:** สไลด์หน้า 15 (Summary เทียบ rubric) → หน้า 16 (Thank you)
+### ขั้น 7 — โชว์ผล Benchmark (Task 4)
 
-**พูด:** สรุปภาพรวมสั้น ๆ ว่าระบบทำอะไรได้ครบตามโจทย์บ้าง แล้วขอบคุณ
+กลับ terminal:
+```bash
+cat report/benchmark_results.csv
+```
+**พูด:** "นี่คือตัวเลขที่วัดได้จริงจากการทดสอบ 3 วิธีการรอไฟล์ ตรงตามที่อธิบายไว้ในสไลด์"
+
+(ถ้าอยากโชว์เพิ่ม เปิดไฟล์ `report/architecture_report.md` เลื่อนให้ดูตารางเปรียบเทียบ 10,000 TPS สั้นๆ)
 
 ---
 
 ## Checklist ก่อนอัปโหลด
+- [ ] เห็น state `deferred` ชัดเจนในขั้น 1
+- [ ] เห็นเลขก่อน/หลังในขั้น 5 **เท่ากันเป๊ะ**
+- [ ] เห็น URL dashboard เป็น public https ไม่ใช่ localhost
 - [ ] เสียงชัด ไม่มีเสียงรบกวน
-- [ ] เห็น URL จริงของ Airflow (localhost:8080 โอเค เพราะรันบนเครื่อง) และ Dashboard (ต้องเป็น public URL ไม่ใช่ localhost)
-- [ ] เห็น `deferred` state ของ sensor อย่างน้อย 1 ครั้งชัดเจน (จุดสำคัญสุดของ Task 2)
-- [ ] เห็นตัวเลขก่อน/หลัง rerun DAG เท่ากัน (proof idempotency)
-- [ ] พูดครบทั้ง 4 Task ตามลำดับ
-- [ ] อัปโหลด YouTube (ตั้ง Unlisted) หรือ Google Drive (เปิดสิทธิ์ "Anyone with the link") แล้วเอา link ไปส่ง
 
-## เวลารวมโดยประมาณ
-| ส่วน | เวลา |
+## เวลาโดยประมาณคลิป 2
+| ขั้น | เวลา |
 |---|---|
-| เปิดคลิป + Agenda + Architecture | 1.5 นาที |
-| Task 1 | 2 นาที |
-| Task 2 | 4-5 นาที |
-| Task 3 | 2 นาที |
-| Task 4 | 2-3 นาที |
-| ปิดคลิป | 0.5 นาที |
-| **รวม** | **~12-15 นาที** |
+| ขั้น 1-2 (Deferrable) | 1.5 นาที |
+| ขั้น 3-4 (Flash Sale) | 2 นาที |
+| ขั้น 5 (Idempotency) | 1.5 นาที |
+| ขั้น 6 (Dashboard) | 1.5 นาที |
+| ขั้น 7 (Benchmark) | 1 นาที |
+| **รวม** | **~7-8 นาที** |
