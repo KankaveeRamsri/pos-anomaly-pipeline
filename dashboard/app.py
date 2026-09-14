@@ -48,7 +48,7 @@ def load_transactions() -> pd.DataFrame:
                 SELECT transaction_id, store_id, pos_terminal, product_id, product_name,
                        quantity, unit_price, total_amount, event_time, ingested_at,
                        is_anomaly, anomaly_reasons, source_file
-                FROM pos_transactions
+                FROM public.pos_transactions
                 ORDER BY event_time DESC
                 LIMIT 5000
                 """
